@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.iot</groupId>
+        <artifactId>iot-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+
+    <name>iot-task-api</name>
+    <artifactId>iot-task-api</artifactId>
+    <description>iot-task-api</description>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <dependencies>
+
+        <!-- Common Public -->
+        <dependency>
+            <groupId>com.iot</groupId>
+            <artifactId>iot-common-public</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Common Model -->
+        <dependency>
+            <groupId>com.iot</groupId>
+            <artifactId>iot-common-model</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.iot</groupId>
+                    <artifactId>iot-common-mysql</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.iot</groupId>
+                    <artifactId>iot-common-mysql-model</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Common Log -->
+        <dependency>
+            <groupId>com.iot</groupId>
+            <artifactId>iot-common-log</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Common Web -->
+        <dependency>
+            <groupId>com.iot</groupId>
+            <artifactId>iot-common-web</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Spring boot WEB -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+    </dependencies>
+
+</project>

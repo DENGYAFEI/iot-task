@@ -1,0 +1,23 @@
+#server:
+#  port: 8202
+#
+#spring:
+#  profiles:
+#    active: dev
+#  application:
+#    name: iot-task-service
+#  cloud:
+##    inetutils:
+##      preferred-networks: 10.20 #当本地使用vpn访问时指定连接的内网地址前缀
+#    nacos:
+#      discovery:
+#        server-addr: 192.168.203.128:8848
+#        namespace: 5d2e70f3-c238-4e83-8b9e-aa7baac7e13c
+#      config:
+#        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+#        namespace: ${spring.cloud.nacos.discovery.namespace}
+#        file-extension: yaml
+#        shared-configs:
+#          # - application.${spring.cloud.nacos.config.file-extension}
+#          - ${spring.application.name}.${spring.cloud.nacos.config.file-extension}
+#          - ${spring.application.name}-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
