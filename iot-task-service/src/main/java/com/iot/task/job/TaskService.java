@@ -1,4 +1,4 @@
-package com.iot.admin.job;
+package com.iot.task.job;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -6,6 +6,8 @@ import javax.annotation.Resource;
 
 import com.iot.common.enums.ScheduleJobEnum;
 import com.iot.common.model.entity.task.GatherJob;
+import com.iot.task.service.GatherJobService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -22,6 +24,9 @@ public class TaskService {
     @Resource
     private CronTaskRegistrar cronTaskRegistrar;
 
+    @Resource
+    private GatherJobService gatherJobService;
+
     /**
      * 添加定时任务
      *
@@ -30,13 +35,13 @@ public class TaskService {
      */
     public GatherJob insertTaskJob(GatherJob scheduleJob) {
 
-        boolean insert = scheduleJob.insert();
+        boolean insert = gatherJobService.save(scheduleJob);
         if (!insert) {
             return null;
         }
         // 添加成功, 并且状态是启用, 则直接放入任务器
         if (scheduleJob.getStatus().equals(ScheduleJobEnum.ENABLE.getCode())) {
-            SchedulingRunnable task = new SchedulingRunnable(scheduleJob.getBean_name(), scheduleJob.getMethodName(), scheduleJob.getMethodParams(), scheduleJob.getJobId());
+            SchedulingRunnable task = new SchedulingRunnable(scheduleJob.getBeanName(), scheduleJob.getMethodName(), scheduleJob.getMethodParams(), scheduleJob.getId());
             cronTaskRegistrar.addCronTask(task, scheduleJob.getCronExpression());
         }
         return scheduleJob;
@@ -49,28 +54,25 @@ public class TaskService {
      * @return boolean
      */
     public boolean updateTaskJob(GatherJob scheduleJob) {
-        scheduleJob.setCreateTime(new Date());
-        scheduleJob.setUpdateTime(new Date());
-
         // 查询修改前任务
         GatherJob existedSysJob = new GatherJob();
         LambdaQueryWrapper<GatherJob> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(GatherJob::getJobId, scheduleJob.getJobId());
-        existedSysJob = existedSysJob.selectOne(queryWrapper);
+        queryWrapper.eq(GatherJob::getId, scheduleJob.getId());
+        existedSysJob = gatherJobService.getOne(queryWrapper);
 
         // 修改任务
         LambdaUpdateWrapper<GatherJob> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(GatherJob::getJobId, scheduleJob.getJobId());
-        boolean update = scheduleJob.update(updateWrapper);
+        updateWrapper.eq(GatherJob::getId, scheduleJob.getId());
+        boolean update = gatherJobService.update(updateWrapper);
         if (!update) {
             return false;
         }
         // 修改成功, 则先删除任务器中的任务, 并重新添加
-        SchedulingRunnable preTask = new SchedulingRunnable(existedSysJob.getBeanName(), existedSysJob.getMethodName(), existedSysJob.getMethodParams(), existedSysJob.getJobId());
+        SchedulingRunnable preTask = new SchedulingRunnable(existedSysJob.getBeanName(), existedSysJob.getMethodName(), existedSysJob.getMethodParams(), existedSysJob.getId());
         cronTaskRegistrar.removeCronTask(preTask);
         // 如果修改后的任务状态是启用, 就加入任务器
-        if (scheduleJob.getJobStatus().equals(ScheduleJobEnum.ENABLED.getStatusCode())) {
-            SchedulingRunnable task = new SchedulingRunnable(scheduleJob.getBeanName(), scheduleJob.getMethodName(), scheduleJob.getMethodParams(), scheduleJob.getJobId());
+        if (scheduleJob.getStatus().equals(ScheduleJobEnum.ENABLE.getCode())) {
+            SchedulingRunnable task = new SchedulingRunnable(scheduleJob.getBeanName(), scheduleJob.getMethodName(), scheduleJob.getMethodParams(), scheduleJob.getId());
             cronTaskRegistrar.addCronTask(task, scheduleJob.getCronExpression());
         }
         return true;
@@ -82,15 +84,15 @@ public class TaskService {
      * @param jobId 定时任务id
      * @return boolean
      */
-    public boolean deleteTaskJob(Integer jobId) {
+    public boolean deleteTaskJob(String jobId) {
         // 先查询要删除的任务信息
         GatherJob existedJob = new GatherJob();
         LambdaQueryWrapper<GatherJob> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(GatherJob::getJobId, jobId);
-        existedJob = existedJob.selectOne(queryWrapper);
+        queryWrapper.eq(GatherJob::getId, jobId);
+        existedJob = gatherJobService.getOne(queryWrapper);
 
         // 删除
-        boolean delete = existedJob.delete(queryWrapper);
+        boolean delete = gatherJobService.remove(queryWrapper);
         if (!delete) {
             return false;
         }
@@ -107,20 +109,20 @@ public class TaskService {
      * @param jobStatus 定时任务状态
      * @return boolean
      */
-    public boolean changeStatus(Integer jobId, Integer jobStatus) {
+    public boolean changeStatus(String jobId, Integer jobStatus) {
         // 修改任务状态
         GatherJob scheduleSetting = new GatherJob();
-        scheduleSetting.setJobStatus(jobStatus);
-        boolean update = scheduleSetting.update(new LambdaUpdateWrapper<GatherJob>().eq(GatherJob::getJobId, jobId));
+        scheduleSetting.setStatus(jobStatus);
+        boolean update = gatherJobService.update(new LambdaUpdateWrapper<GatherJob>().eq(GatherJob::getId, jobId));
         if (!update) {
             return false;
         }
         // 查询修改后的任务信息
         GatherJob existedJob = new GatherJob();
-        existedJob = existedJob.selectOne(new LambdaQueryWrapper<GatherJob>().eq(GatherJob::getJobId, jobId));
+        existedJob = gatherJobService.getOne(new LambdaQueryWrapper<GatherJob>().eq(GatherJob::getId, jobId));
         // 如果状态是启用, 则添加任务
         SchedulingRunnable task = new SchedulingRunnable(existedJob.getBeanName(), existedJob.getMethodName(), existedJob.getMethodParams(), jobId);
-        if (existedJob.getJobStatus().equals(ScheduleJobEnum.ENABLED.getStatusCode())) {
+        if (existedJob.getStatus().equals(ScheduleJobEnum.ENABLE.getCode())) {
             cronTaskRegistrar.addCronTask(task, existedJob.getCronExpression());
         } else {
             // 反之, 则删除任务

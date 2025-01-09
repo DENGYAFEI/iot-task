@@ -1,4 +1,4 @@
-package com.iot.admin.job;
+package com.iot.task.job;
 
 import javax.annotation.Resource;
 import org.springframework.beans.factory.DisposableBean;

@@ -1,5 +1,6 @@
-package com.iot.admin.job;
+package com.iot.task.job;
 
+import cn.hutool.extra.spring.SpringUtil;
 import com.iot.common.base.utils.SpringContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -25,9 +26,9 @@ public class SchedulingRunnable implements Runnable {
 
     private final String params;
 
-    private final Integer jobId;
+    private final String jobId;
 
-    public SchedulingRunnable(String beanName, String methodName, String params, Integer jobId) {
+    public SchedulingRunnable(String beanName, String methodName, String params, String jobId) {
         this.beanName = beanName;
         this.methodName = methodName;
         this.params = params;
@@ -39,7 +40,7 @@ public class SchedulingRunnable implements Runnable {
         log.info("定时任务开始执行 - bean: {}, 方法: {}, 参数: {}, 任务ID: {}", beanName, methodName, params, jobId);
         long startTime = System.currentTimeMillis();
         try {
-            Object target = SpringContextUtils.getBean(beanName);
+            Object target = SpringUtil.getBean(beanName);
 
             Method method;
             if (StringUtils.isNotEmpty(params)) {

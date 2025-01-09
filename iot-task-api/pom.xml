@@ -24,23 +24,6 @@
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
-        <!-- Common Model -->
-        <dependency>
-            <groupId>com.iot</groupId>
-            <artifactId>iot-common-model</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.iot</groupId>
-                    <artifactId>iot-common-mysql</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.iot</groupId>
-                    <artifactId>iot-common-mysql-model</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <!-- Common Log -->
         <dependency>
             <groupId>com.iot</groupId>
